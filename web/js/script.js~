@@ -1,0 +1,26 @@
+$( document ).ready(function() {
+    
+    $('.select-inst').on('click', function(event) {
+      event.preventDefault();
+      $(this).toggleClass('btn-primary');
+      $('.search-block').toggleClass('hidden');
+    });
+    /*
+    $('.search-region-btn').on('click', function(event) {
+      event.preventDefault();
+      $(this).toggleClass('btn-primary');
+      $('.search-region-list').toggleClass('hidden');
+    });
+    
+    $('.search-direction-btn').on('click', function(event) {
+      event.preventDefault();
+      $(this).toggleClass('btn-primary');
+      $('.search-direction-list').toggleClass('hidden');
+    });    
+    
+    $('.search-direction-list > li > a').on('click', function(event) {
+      event.preventDefault();
+      $(this).parent().find('ul').toggleClass('hidden');      
+    });*/
+    
+}); // end ready
