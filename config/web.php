@@ -8,6 +8,7 @@ $config = [
     'bootstrap' => ['log'],
     'layout' => 'main',
     'components' => [
+    	  'eauth' => require('eauth.php'),
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => '9ybV0IsZz7v0qj8snv7fz7Dr2YCUDbJh',
@@ -80,15 +81,14 @@ $config = [
                 //directions
                 'directions/?<instance:\w*>/?<id:\d*>/?' => 'main/directions',
                 // selected institutions
-                'inst/<id:\d+>' => 'main/iselected',
-                'tech/<id:\d+>' => 'main/tselected',
-                '<en:\w+>' => 'main/iselected',
-
+                'inst/<id:\d+>/?' => 'main/iselected',
+                'tech/<id:\d+>/?' => 'main/tselected',
+                '<en_title:\w+>' => 'main/iselected',
             ],
         ],
-        
     ],
     'params' => $params,
+
 ];
 
 if (YII_ENV_DEV) {
