@@ -2,14 +2,14 @@
 /* @var $this yii\web\View */
 use app\components\SidebarWidget;
 
-$this->title = 'GetUp';
+$this->title = 'Diftong';
 ?>
 
 <div class="row">
 	<div class="col-md-8">
 	    <h1 class="page-header">
-	        Page Heading
-	        <small>Welcome</small>
+	        Diftong
+	        <small>Добро пожаловать</small>
 	    </h1>
 	    <form>
 	      <div class="form-group">

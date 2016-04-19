@@ -77,7 +77,41 @@ class Tech extends \yii\db\ActiveRecord
 		}
 
 		return $techs;
-}
+	}
 
-		
+	public static function findByRegion ( $region, $lang = 'ru' )
+	{
+		if(NULL == $lang || $lang == 'ru'){
+				
+			$techs = ( new Query() )
+					->select(['l1v7_tech.*', 'city' => 'l1v7_city.title_ru'])
+					->from('l1v7_tech')
+					->join('JOIN', 'l1v7_city', 'l1v7_tech.city_id=l1v7_city.id')
+					->where("l1v7_city.region_id=(SELECT id FROM l1v7_region where title_en='$region')")
+					->all();
+
+		} else {
+					
+			$techs = ( new Query() )
+					->select(['l1v7_tech.*', 'city' => 'l1v7_city.title_ua'])
+					->from('l1v7_tech')
+					->join('JOIN', 'l1v7_city', 'l1v7_tech.city_id=l1v7_city.id')
+					->where("l1v7_city.region_id=(SELECT id FROM l1v7_region where title_en='$region')")
+					->all();
+		}
+
+		return $techs;
+	}
+
+	public static function findById($id)
+	{
+		$tech = ( new Query() )
+			->select(['l1v7_tech.*', 'city' => 'l1v7_city.title_ru'])
+			->from('l1v7_tech')
+			->join('JOIN', 'l1v7_city', 'l1v7_tech.city_id=l1v7_city.id')
+			->where(['l1v7_tech.id' => $id])
+			->one();
+
+		return $tech;
+	}
 }

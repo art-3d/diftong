@@ -2,102 +2,106 @@
 
 namespace app\models;
 
-class User extends \yii\base\Object implements \yii\web\IdentityInterface
+use Yii;
+
+/**
+ * This is the model class for table "{{%user}}".
+ *
+ * @property integer $id
+ * @property string $username
+ * @property string $email
+ * @property string $password_hash
+ * @property integer $status
+ * @property string $auth_key
+ * @property string $created_at
+ * @property string $updated_at
+ */
+class User extends \yii\db\ActiveRecord
 {
-    public $id;
-    public $username;
-    public $password;
-    public $authKey;
-    public $accessToken;
-
-    private static $users = [
-        '100' => [
-            'id' => '100',
-            'username' => 'admin',
-            'password' => 'admin',
-            'authKey' => 'test100key',
-            'accessToken' => '100-token',
-        ],
-        '101' => [
-            'id' => '101',
-            'username' => 'demo',
-            'password' => 'demo',
-            'authKey' => 'test101key',
-            'accessToken' => '101-token',
-        ],
-    ];
+	/**
+	 * @var array EAuth attributes
+	 */
+	public $profile;
 
     /**
      * @inheritdoc
      */
-    public static function findIdentity($id)
+    public static function tableName()
     {
-        return isset(self::$users[$id]) ? new static(self::$users[$id]) : null;
+        return '{{%user}}';
     }
 
     /**
      * @inheritdoc
      */
-    public static function findIdentityByAccessToken($token, $type = null)
+    public function rules()
     {
-        foreach (self::$users as $user) {
-            if ($user['accessToken'] === $token) {
-                return new static($user);
-            }
-        }
-
-        return null;
+        return [
+            [['username', 'email', 'password_hash', 'status', 'auth_key'], 'required'],
+            [['status'], 'integer'],
+            [['created_at', 'updated_at'], 'safe'],
+            [['username', 'email'], 'string', 'max' => 255],
+            [['password_hash', 'auth_key'], 'string', 'max' => 32],
+            [['username', 'email'], 'unique', 'targetAttribute' => ['username', 'email'], 'message' => 'The combination of Username and Email has already been taken.'],
+        ];
     }
 
     /**
-     * Finds user by username
-     *
-     * @param  string      $username
-     * @return static|null
+     * @inheritdoc
      */
+    public function attributeLabels()
+    {
+        return [
+            'id' => 'ID',
+            'username' => 'Username',
+            'email' => 'Email',
+            'password_hash' => 'Password Hash',
+            'status' => 'Status',
+            'auth_key' => 'Auth Key',
+            'created_at' => 'Created At',
+            'updated_at' => 'Updated At',
+        ];
+    }
+
+    /* EAuth */
+
     public static function findByUsername($username)
     {
-        foreach (self::$users as $user) {
-            if (strcasecmp($user['username'], $username) === 0) {
-                return new static($user);
-            }
-        }
+    	return static::findOne([
+    		'username'	=> $username
+    	]);
+    }
 
-        return null;
+    public static function findIdentity($id)
+    {
+    	if (Yii::$app->getSession()->has('user-'.$id)) {
+    		return new self(Yii::$app->getSession()->get('user-'.$id));
+    	} else {
+    		return isset(self::$users[$id]) ? new self(self::$users[$id]) : null;
+    	}
     }
 
     /**
-     * @inheritdoc
+     * @param \nodge\eauth\ServiceBase $service
+     * @return User
+     * @throws ErrorException
      */
-    public function getId()
+    public static function findByEauth($service)
     {
-        return $this->id;
+    	if (!$service->getIsAuthenticated()) {
+    		throw new ErrorException('EAuth user should be authenticated before creating identity.');
+    	}
+
+    	$id = $service->getService().'-'.$service->getId();
+       $attributes = [
+          'id' => $id,
+          'username' => $service->getAttribute('name'),
+          'authKey' => md5($id),
+          'profile' => $service->getAttributes(),
+      ];
+      $attributes['profile']['service'] = $service->getServiceName();
+      Yii::$app->getSession()->set('user-'.$id, $attributes);
+      return new self($attributes);   	
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function getAuthKey()
-    {
-        return $this->authKey;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function validateAuthKey($authKey)
-    {
-        return $this->authKey === $authKey;
-    }
-
-    /**
-     * Validates password
-     *
-     * @param  string  $password password to validate
-     * @return boolean if password provided is valid for current user
-     */
-    public function validatePassword($password)
-    {
-        return $this->password === $password;
-    }
 }

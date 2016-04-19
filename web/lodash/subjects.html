@@ -1,0 +1,32 @@
+<div class="col-md-12 subjects">
+	<!-- add subject -->
+	<button data-toggle="collapse" data-target="#add-subject-block" class="btn">Добавить предмет</button>
+	<div  id="add-subject-block" class="collapse">
+		<div class="input-group">
+			<input type="text" class="form-control" id="subject-title" placeholder="Название предмета">
+			<span class="input-group-btn">
+				<button id="add-subject-btn" class="btn btn-primary" type="button">Добавить предмет</button>
+			</span>
+		</div>
+	</div>
+	<% if (subjects.length == 0) { %>
+	<div class="row">
+		<h3><small><%= direction %></small> Предметов пока нет, добавляй новый</h3>
+	</div>
+	<% } else { %>
+	<h3><small><%= direction %></small> Предметы</h3>
+	<ul class="list-group directions">
+		<% subjects.forEach(function(item) { %>
+		<li class="list-group-item">
+			<a class="subject" href="#<%- item.id%>">	
+				<%-item.title_ru%>			
+			</a>
+			<% if (item.is_checked==0) {  %>
+				<span class="badge"><%= 'Предмет не проверен' %></span>
+			<% } %>
+		</li>
+		<% }); %>
+	</ul>
+
+	<% } %>
+</div>

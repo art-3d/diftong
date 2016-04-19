@@ -1,7 +1,13 @@
 .navbar{
   background-color: #cfcfcf!important;
+  font-size: 1.1em;
 }
 
 .navbar *{
   color: black!important; 
+}
+
+.green {
+	color: rgb(0,127,0)!important;
+	font-size: 1.3em;
 }

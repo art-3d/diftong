@@ -27,7 +27,7 @@ AppAsset::register($this);
 <div class="wrap">
     <?php
     NavBar::begin([
-        'brandLabel' => 'GetUp',
+    	  'brandLabel' => '<span class="green">D</span>iftong',
         'brandUrl' => Yii::$app->homeUrl,
         'options' => [
             'class' => 'navbar navbar-default navbar-static-top',
@@ -59,7 +59,7 @@ AppAsset::register($this);
 
 <footer class="footer">
     <div class="container">
-        <p class="pull-left">&copy; Get Up <?= date('Y') ?></p>
+        <p class="pull-left">&copy; Diftong <?= date('Y') ?></p>
     </div>
 </footer>
 

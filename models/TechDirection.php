@@ -58,4 +58,17 @@ class TechDirection extends \yii\db\ActiveRecord
 					
 			return 	$tech_directions;				
 		}
+
+		public static function findById($id)
+		{
+			$directions = ( new Query() )
+				->select('l1v7_tech_direction.*')
+				->from('l1v7_tech_direction')
+				->join('JOIN', 'l1v7_tech_tech_direction', 'l1v7_tech_tech_direction.tech_direction_id=l1v7_tech_direction.id')
+				->join('JOIN', 'l1v7_tech', 'l1v7_tech_tech_direction.tech_id=l1v7_tech.id')
+				->where(['l1v7_tech.id' => $id])
+				->all();
+
+			return $directions;
+		}
 }

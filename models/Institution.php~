@@ -108,20 +108,8 @@ class Institution extends \yii\db\ActiveRecord
 		return $insts;
 	}
 
-	public static function findByTitle($id = false, $en_title = false)
+	public function findByTitle($id = false, $en = false)
 	{
-		$query = new Query();
-		$query->select(['l1v7_institution.*', 'city' => 'l1v7_city.title_ru'])
-				->from('l1v7_institution')
-				->join('JOIN', 'l1v7_city', 'l1v7_institution.city_id=l1v7_city.id');
-				if ( $id != false ) {
-						$query->where(['l1v7_institution.id' => $id]);
-				} else{
-						$query->where(['l1v7_institution.title_en' => $en_title]);
-				}
-		$inst = $query->one();
-		
-		return $inst;	
+		echo 's';die;
 	}
-	
 }

@@ -58,4 +58,20 @@ class Direction extends \yii\db\ActiveRecord
 					
 			return $inst_directions;
 		}
+
+		public static function findByTitle($id = false, $en_title = false) {
+			$query = new Query();
+			$query->select('l1v7_direction.*')
+					->from('l1v7_direction')
+					->join('JOIN', 'l1v7_institution_direction', 'l1v7_institution_direction.direction_id=l1v7_direction.id')
+					->join('JOIN', 'l1v7_institution', 'l1v7_institution_direction.institution_id=l1v7_institution.id');
+					if($id!=false) {
+							$query->where(['l1v7_institution.id' => $id]);
+					} else{
+							$query->where(['l1v7_institution.title_en' => $en_title]);
+					}
+			$directions = $query->all();
+
+			return $directions;
+		}
 }

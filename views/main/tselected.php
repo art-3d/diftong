@@ -14,11 +14,13 @@ $this->params['breadcrumbs'][] = ['label' => $tech['title_ru']];
 			<?= $tech['title_ru'] ?>
 			<small><?= $tech['city']?></small>
 		</h3>
-		<h4 class="well">Направления</h4>
-		<ul class="list-group">
+		<div class="well row">
+			<h4 name="directions">Направления</h4>
+		</div>
+		<ul class="list-group directions">
 			<?php foreach($directions as $direction): ?>
-				<li class="list-group-item">
-					<a href="#">
+				<li class="list-group-item direction">
+					<a href="?direct=<?= $direction['id'] ?>">
 						<?= $direction['title_ru'] ?>
 					</a>
 				</li>

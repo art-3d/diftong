@@ -14,16 +14,16 @@ $this->params['breadcrumbs'][] = ['label' => $inst['title_ru']];
 			<?= $inst['title_ru'] ?>
 			<small><?= $inst['city']?></small>
 		</h3>
-		<h4 class="well">Направления</h4>
-		<ul class="list-group">
-			<?php $i = 0; ?>
+		<div class="well row">
+			<h4 name="directions">Направления</h4>
+		</div>
+		<ul class="list-group directions">
 			<?php foreach($directions as $direction): ?>
-				<li class="list-group-item direction">
-					<a href="#<?php echo $i ?>">
+				<li class="list-group-item direction" >
+					<a href="?direct=<?= $direction['id'] ?>" >
 						<?= $direction['title_ru'] ?>
 					</a>
 				</li>
-				<?php ++$i; ?>
 			<?php endforeach; ?>
 		</ul>
 	</div>
