@@ -1,0 +1,18 @@
+<?php
+
+use yii\db\Migration;
+
+class m160502_192342_create_user_table extends Migration
+{
+    public function up()
+    {
+        $this->createTable('user_table', [
+            'id' => $this->primaryKey()
+        ]);
+    }
+
+    public function down()
+    {
+        $this->dropTable('user_table');
+    }
+}

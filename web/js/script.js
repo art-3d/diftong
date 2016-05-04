@@ -148,14 +148,37 @@ $( document ).ready(function() {
 		} else {
 			setTimeout(showFiles, 10);
 		}
-	});
-	
+	});		
 	
 	/* breadcrumb */
 	
 	if ( $('.breadcrumb > li').length ) {
 		$('.close').click();
 	}
+	
+	/* login / signup / logout */
+	// nav btn
+	$('a[href="/login"]').on('click', function(event) {
+	  event.preventDefault();
+	});	
+
+	// login
+	$('input[name=login-btn]').on('click', function(event) {
+	  event.preventDefault();
+	  login();  
+	});
+	
+	//signup
+	$('input[name=signup-btn]').on('click', function(event) {
+	  event.preventDefault();
+	  signup();
+	});
+	
+	//logout
+	$('li a[href="/logout"]').on('click', function(event) {
+	  event.preventDefault();
+	  logout();
+	});
 		
 }); // end ready
 
@@ -165,12 +188,9 @@ $( document ).ready(function() {
 function showSubjects(direction) {
 	$('.directions').hide();
 	$('h4[name=directions]').html('<a class="btn btn-primary all-directions" href="'+window.location.pathname+'">Все направления</a>');
-
 	
 	var url = '/main/get-subject' + window.location.search;
 	var pathname = window.location.pathname;
-
-
 
 	if ( null !== pathname.match(/\/inst\/[\d]+/) ) {
 		var inst_id = pathname.replace(/\D*/, '');
@@ -227,5 +247,99 @@ function showFiles() {
 	}).success(function(data) {
 		console.log(data);
 	});
+}
 
+/* login \ signup */
+function login() {
+  var login = $('form[name=login] input[name=login]').val();
+  var password = $('form[name=login] input[name=password]').val();
+  var remember_me = $('.loginmodal-container input[name=remember_me]').is(':checked');
+  
+  $.ajax({
+    method: 'POST',
+    dataType: 'json',
+    url: '/login',
+    data: {login: login, password: password, remember_me: remember_me}, 
+  }).success(function(data) {
+    
+    if (data['status'] == true) {
+      document.location.reload(true); 
+    } else {
+      let errors = data['errors'];
+      let error_message = '';
+      for (let index in errors) {
+        error_message += '<p>'+errors[index]+'</p>';
+      }
+      $('.login-help').html(error_message);
+      $('form[name=login] input').on('input', function(event){
+        $('.login-help').html('');
+      });     
+    }
+    
+  });  
+  
+}
+
+function signup() {  
+  var login = $('form[name=signup] input[name=login').val();
+  var email = $('form[name=signup] input[name=email]').val();
+  var password = $('form[name=signup] input[name=password]').val();
+  var re_password = $('form[name=signup] input[name=re-password]').val();
+  
+  if (password !== re_password) {
+    $('.signup-help').html('<p>Пароли не совпадают</p>');
+    $('form[name=signup] input').on('input', function(event){
+      $('.signup-help').html('');
+    });
+    $('form[name=signup] input[name=re-password]').css('border', '1px solid red').on('input', function(event){
+      $(this).css('border', 'none');
+    });
+    return false;
+  }
+  
+  $.ajax({
+    method: 'POST',
+    dataType: 'json',
+    url: '/signup',
+    data: {login: login, email: email, password: password},
+  }).success(function(data) {
+    if (data['status'] == true) { //success signup
+      if (window.location.pathname == '/signup') {
+        window.location.href = '/login';
+        return true;
+      }
+      $('.modal-content ul li a').click();      
+    } else { // signup error
+      let errors = data['errors'];
+      if (errors['username'] != undefined) {
+        $('form[name=signup] input[name=login]').css('border', '1px solid red').on('input', function(event){
+          $(this).css('border', 'none');
+        });        
+      }
+      if (errors['email'] != undefined) {
+        $('form[name=signup] input[name=email]').css('border', '1px solid red').on('input', function(event){
+          $(this).css('border', 'none');
+        });        
+      }
+      
+      let error_message = '';
+      for (let index in errors) {
+        error_message += '<p>'+errors[index]+'</p>';
+      }
+      $('.signup-help').html(error_message);
+      $('form[name=signup] input').on('input', function(event){
+        $('.signup-help').html('');
+      });      
+    }
+  });
+  
+}
+
+function logout() {
+  $.ajax({
+    method: 'POST',
+    url: '/logout',    
+  }).success(function(data) {    
+    document.location.reload(true); 
+  });
 }
