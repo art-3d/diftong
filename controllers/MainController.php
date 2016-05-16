@@ -26,12 +26,10 @@ class MainController extends Controller
 	public function __construct($id, $module, $config = [])
 	{
     
-    $response = Yii::$app->response;
-    
-    $response->on($response::EVENT_BEFORE_SEND, function($event) {
-      $data = $event->sender->data;
-      //$event->sender->data = str_replace('/assets/c9d8334/jquery.js', '/js/zepto.min.js', $data);
-    });
+	    $response = Yii::$app->response;
+	    
+	    $response->on($response::EVENT_BEFORE_SEND, function($event) {
+	    });
     
 		parent::__construct($id, $module, $config);	
 	}
@@ -54,19 +52,19 @@ class MainController extends Controller
 
 	public function actionSearch()
 	{
-			$query = yii::$app->request->get('inst');
+		$query = yii::$app->request->get('inst');
 
-			return $this->render('search',[
-							'inst' => $query,
-							's' => 's',
-					]);
+		return $this->render('search',[
+					'inst' => $query,
+					's' => 's',
+				]);
 	}
 
 	public function actionDirections( $instance=false, $id=false )
 	{
 		if ($instance == 'inst') { // institutions
 			if($id){
-        $data = Institution::findByDirId($id);       
+       			 $data = Institution::findByDirId($id);       
 				$direction = Direction::find()
 						->where(['id' => $id])
 						->one();
@@ -77,12 +75,12 @@ class MainController extends Controller
 						]);
 						
 			} else { // directions of colleges
-        $inst_directions = InstitutionDirection::getAll();
+        			$inst_directions = InstitutionDirection::getAll();
 				return $this->render('inst_directions', ['inst_directions' => $inst_directions]);                    
 			}
 		} elseif ($instance == 'tech') { // technicums
 			if($id){
-        $data = Tech::findByDirId($id);						
+       			 $data = Tech::findByDirId($id);						
 				$direction = Direction::find()
 						->where(['id' => $id])
 						->one();
@@ -93,14 +91,14 @@ class MainController extends Controller
 						]);
 						
 			} else { // directions of technicums
-        $tech_directions = TechDirection::getAll();   
+        			$tech_directions = TechDirection::getAll();   
 				return $this->render('tech_directions', ['tech_directions' => $tech_directions]);
 				
 			}
 		}  
 		
 		// list of directions				
-    $tech_directions = TechDirection::getAll();
+    		$tech_directions = TechDirection::getAll();
 		$inst_directions = InstitutionDirection::getAll();			
 		return $this->render('all_directions', [
 						'inst_directions' => $inst_directions,
