@@ -1,6 +1,15 @@
 $( document ).ready(function() {
 	'use strict';
-
+  
+  // TEST MODE (DELETE)
+  setTimeout(function() {
+    $('.select-inst').click();
+  }, 1000);
+  setTimeout(function() {
+    $('input[name=inst]').focus();
+  }, 2000);
+  // END DELETE
+  
 	$('.select-inst').on('click', function(event) {
 		event.preventDefault();
 		$(this).toggleClass('btn-primary');
@@ -97,7 +106,7 @@ $( document ).ready(function() {
 
 		var subject_title = $('#subject-title').val();
 
-		var url = '/main/add-subject'+window.location.search;
+		var url = '/ajax/add-subject'+window.location.search;
 		url += '&title='+subject_title;
 
 		var pathname = window.location.pathname;
@@ -189,7 +198,7 @@ function showSubjects(direction) {
 	$('.directions').hide();
 	$('h4[name=directions]').html('<a class="btn btn-primary all-directions" href="'+window.location.pathname+'">Все направления</a>');
 	
-	var url = '/main/get-subject' + window.location.search;
+	var url = '/ajax/get-subject' + window.location.search;
 	var pathname = window.location.pathname;
 
 	if ( null !== pathname.match(/\/inst\/[\d]+/) ) {
@@ -242,7 +251,7 @@ function showFiles() {
 	$.ajax({
 		method: 'POST',
 		dataType: 'json',
-		url: '/main/get-file',
+		url: '/ajax/get-file',
 		data: {pathname: pathname, id: id},
 	}).success(function(data) {
 		console.log(data);
@@ -302,13 +311,13 @@ function signup() {
     dataType: 'json',
     url: '/signup',
     data: {login: login, email: email, password: password},
-  }).success(function(data) {
+    success: (function(data) {
     if (data['status'] == true) { //success signup
       if (window.location.pathname == '/signup') {
         window.location.href = '/login';
         return true;
       }
-      $('.modal-content ul li a').click();      
+      $('.modal-content ul li a[href="#login-form"]').click();      
     } else { // signup error
       let errors = data['errors'];
       if (errors['username'] != undefined) {
@@ -331,6 +340,7 @@ function signup() {
         $('.signup-help').html('');
       });      
     }
+  }),
   });
   
 }
@@ -339,9 +349,7 @@ function logout() {
   $.ajax({
     method: 'POST',
     url: '/logout',    
-  }).success(function(data) {
-    
-    console.log('catch');
+  }).success(function(data) {    
     document.location.reload(true); 
   });
 }

@@ -5,6 +5,7 @@ namespace app\models;
 use Yii;
 use app\models\City;
 use yii\db\Query;
+use yii\data\Pagination;
 
 /**
  * This is the model class for table "l1v7_institution".
@@ -124,4 +125,26 @@ class Institution extends \yii\db\ActiveRecord
 		return $inst;	
 	}
 	
+	public static function findByDirId($id, $pageSize = 15)
+	{
+		$query = new Query();
+		$query
+				->select(['l1v7_institution.*', 'city' => 'l1v7_city.title_ru'])
+				->from('l1v7_institution')
+				->join('JOIN', 'l1v7_institution_direction', 'l1v7_institution.id=l1v7_institution_direction.institution_id')
+				->join('JOIN', 'l1v7_city', 'l1v7_city.id=l1v7_institution.city_id')
+				->where(['l1v7_institution_direction.direction_id' => $id]);
+		$pagination = new Pagination([
+				'defaultPageSize' => $pageSize,
+				'totalCount' => $query->count(),
+		]);
+		$insts = $query
+				->offset($pagination->offset)
+				->limit($pagination->limit)
+				->all();
+		return [
+		  'insts' => $insts,
+		  'pagination' => $pagination,
+		  ];			  
+	}
 }

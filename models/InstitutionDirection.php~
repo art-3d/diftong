@@ -53,7 +53,5 @@ class InstitutionDirection extends \yii\db\ActiveRecord
 					->groupBy('l1v7_direction.id')
 					->orderBy('count DESC')
 					->all();
-					
-		  return $directions;
     }
 }

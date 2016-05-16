@@ -133,6 +133,6 @@ class Tech extends \yii\db\ActiveRecord
 			  ->offset($pagination->offset)
 			  ->limit($pagination->limit)
 			  ->all();
-		return ['techs' => $techs, 'pagination' => $pagination];	  	  
+		return ['tech' => $tech, 'pagination' => $pagination];	  	  
 	}
 }

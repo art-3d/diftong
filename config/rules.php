@@ -12,7 +12,7 @@ return [
 	'logout'	        => 'security/logout',
 	'forgot-password' => 'security/forgot-password',
 		//ajax
-	'getlink' => 'main/getlink',
+	'getlink' => 'ajax/getlink',
 		//regions
 	'sumy' 				  => 'main/region',
 	'kiev' 				  => 'main/region',

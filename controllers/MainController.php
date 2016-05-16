@@ -1,5 +1,4 @@
 <?php
-
 namespace app\controllers;
 
 use Yii;
@@ -14,6 +13,7 @@ use yii\filters\AccessControl;
 
 use app\models\Region;
 use app\models\Institution;
+use app\models\InstitutionDirection;
 use app\models\Direction;
 use app\models\InstitutionSubject;
 use app\models\Tech;
@@ -25,8 +25,14 @@ class MainController extends Controller
 
 	public function __construct($id, $module, $config = [])
 	{
-
-
+    
+    $response = Yii::$app->response;
+    
+    $response->on($response::EVENT_BEFORE_SEND, function($event) {
+      $data = $event->sender->data;
+      //$event->sender->data = str_replace('/assets/c9d8334/jquery.js', '/js/zepto.min.js', $data);
+    });
+    
 		parent::__construct($id, $module, $config);	
 	}
 
@@ -44,107 +50,7 @@ class MainController extends Controller
 		]);
 	}
 
-	public function actionGetInst()
-	{
-		if( !Yii::$app->request->isAjax) {
-			throw new \yii\web\NotFoundHttpException('The request must be Ajax');
-		}
 
-		Yii::$app->response->format = Response::FORMAT_JSON;
-		$lang = Yii::$app->request->cookies['lang'];
-
-		$techs = Tech::getAll($lang);
-		$insts = Institution::getAll($lang);
-
-		return ['techs' => $techs, 'insts' => $insts];				
-	}
-
-	public function actionGetSubject()
-	{
-		if (!Yii::$app->request->isAjax) {
-			throw new \yii\web\NotFoundHttpException('The request must be Ajax');
-		}
-
-		Yii::$app->response->format = Response::FORMAT_JSON;
-
-		$direction_id = Yii::$app->request->get('direct');
-
-		if ( $title_en = Yii::$app->request->get('title_en') ) {
-			$subjects = InstitutionSubject::findByDirection($direction_id, $title_en);
-
-		} elseif ($inst_id = Yii::$app->request->get('inst') ) {
-			$subjects = InstitutionSubject::findByDirection($direction_id, $inst_id);
-
-		} elseif ($tech_id = Yii::$app->request->get('tech') ) {
-			$subjects = TechSubject::findByDirection($direction_id, $tech_id);
-
-		} else {
-			throw new NotFoundHttpException('The route does not exist');
-		}
-
-		return $subjects;
-	}
-
-	public function actionGetFile()
-	{
-		if( !Yii::$app->request->isAjax) {
-			throw new \yii\web\NotFoundHttpException('The request must be Ajax');
-		}
-
-		Yii::$app->response->format = Response::FORMAT_JSON;
-
-		$subject_id = Yii::$app->request->post('id');
-		$pathname = Yii::$app->request->post('pathname');
-
-		if ( preg_match('/^\/tech/', $pathname) ) { // tech
-			$tech_id = str_replace('/tech/', '', $pathname);
-			return ['tech_id' => $tech_id];
-			//$files = TechSubject::getFiles($)
-		} else { // inst
-
-		}
-
-		return ['id' => $subject_id, 'pathname' => $pathname];
-	}
-
-	public function actionAddSubject()
-	{
-		if( !Yii::$app->request->isAjax) {
-			throw new \yii\web\NotFoundHttpException('The request must be Ajax');
-		}
-
-		Yii::$app->response->format = Response::FORMAT_JSON;
-
-		$lang = Yii::$app->request->cookies['lang'];
-		$title_row = $lang == 'ua' ? 'title_ua' : 'title_ru';
-		$direction_id = Yii::$app->request->get('direct');
-
-		$subject_title = Yii::$app->request->get('title');
-
-
-		if ( $title_en = Yii::$app->request->get('title_en') ) {
-			$row = (new Query)->select('id')->from('l1v7_institution')->where(['title_en' => $title_en])->one();
-			$institution_id = $row['id'];
-			$entity = new InstitutionSubject();
-			$entity->institution_id = $institution_id;
-
-		} elseif ($inst_id = Yii::$app->request->get('inst_id') ) {
-			$entity = new InstitutionSubject();
-			$entity->institution_id = $inst_id;
-
-		} elseif ($tech_id = Yii::$app->request->get('tech_id') ) {
-			$entity = new TechSubject();
-			$entity->tech_id = $tech_id;
-
-		} else {
-			throw new NotFoundHttpException('The route does not exist');
-		}
-
-		$entity->$title_row = $subject_title;
-		$entity->direction_id = $direction_id;
-		$entity->created = time();		
-		$entity->save();
-	}
 
 	public function actionSearch()
 	{
@@ -158,118 +64,48 @@ class MainController extends Controller
 
 	public function actionDirections( $instance=false, $id=false )
 	{
-		if ($instance == 'inst') { // colleges
+		if ($instance == 'inst') { // institutions
 			if($id){
-
-				$query = new Query();
-				$query
-						->select(['l1v7_institution.*', 'city' => 'l1v7_city.title_ru'])
-						->from('l1v7_institution')
-						->join('JOIN', 'l1v7_institution_direction', 'l1v7_institution.id=l1v7_institution_direction.institution_id')
-						->join('JOIN', 'l1v7_city', 'l1v7_city.id=l1v7_institution.city_id')
-						->where(['l1v7_institution_direction.direction_id' => $id]);
-				$pagination = new Pagination([
-						'defaultPageSize' => 15,
-						'totalCount' => $query->count(),
-				]);
-				$insts = $query
-						->offset($pagination->offset)
-						->limit($pagination->limit)
-						->all();
-
+        $data = Institution::findByDirId($id);       
 				$direction = Direction::find()
 						->where(['id' => $id])
 						->one();
-
 				return $this->render('inst_direction', [
 								'direction' => $direction,
-								'insts' => $insts,
-								'pagination' => $pagination,
+								'insts' => $data['insts'],
+								'pagination' => $data['pagination'],
 						]);
-			} else { // list of directions of colleges
-				$query = new Query();
-				$inst_directions = $query
-						->select(['l1v7_direction.*', 'count' => 'count(l1v7_institution.id)'])
-						->from('l1v7_direction')
-						->join('JOIN', 'l1v7_institution_direction', 'l1v7_institution_direction.direction_id=l1v7_direction.id')
-						->join('JOIN', 'l1v7_institution' , 'l1v7_institution_direction.institution_id=l1v7_institution.id')
-						->groupBy('l1v7_direction.id')
-						->orderBy('count DESC')
-						->all();
-
-						return $this->render('inst_directions', [
-										'inst_directions' => $inst_directions,
-								]);                    
+						
+			} else { // directions of colleges
+        $inst_directions = InstitutionDirection::getAll();
+				return $this->render('inst_directions', ['inst_directions' => $inst_directions]);                    
 			}
-
 		} elseif ($instance == 'tech') { // technicums
 			if($id){
-				$query = new Query();
-				$query
-						->select(['l1v7_tech.*', 'city' => 'l1v7_city.title_ru'])
-						->from('l1v7_tech')
-						->join('JOIN', 'l1v7_institution_direction', 'l1v7_tech.id=l1v7_institution_direction.institution_id')
-						->join('JOIN', 'l1v7_city', 'l1v7_city.id=l1v7_tech.city_id')
-						->where(['l1v7_institution_direction.direction_id' => $id]);
-				$pagination = new Pagination([
-						'defaultPageSize' => 15,
-						'totalCount' => $query->count(),
-				]);
-				$techs = $query
-						->offset($pagination->offset)
-						->limit($pagination->limit)
-						->all();
+        $data = Tech::findByDirId($id);						
 				$direction = Direction::find()
 						->where(['id' => $id])
 						->one();
-
 				return $this->render('tech_direction', [
 								'direction' => $direction,
-								'techs' => $techs,
-								'pagination' => $pagination,
+								'techs' => $data['techs'],
+								'pagination' => $data['pagination'],
 						]);
-			} else { // list of directions of technicums
-				$query = new Query();
-				$tech_directions = $query
-						->select(['l1v7_tech_direction.*', 'count' => 'count(l1v7_tech.id)'])
-						->from('l1v7_tech_direction')
-						->join('JOIN', 'l1v7_tech_tech_direction', 'l1v7_tech_tech_direction.tech_direction_id=l1v7_tech_direction.id')
-						->join('JOIN', 'l1v7_tech' , 'l1v7_tech_tech_direction.tech_id=l1v7_tech.id')
-						->groupBy('l1v7_tech_direction.id')
-						->orderBy('count DESC')
-						->all();
-
-						return $this->render('tech_directions', [
-										'tech_directions' => $tech_directions,
-								]);
+						
+			} else { // directions of technicums
+        $tech_directions = TechDirection::getAll();   
+				return $this->render('tech_directions', ['tech_directions' => $tech_directions]);
+				
 			}
-
-		} else { // list of directions
-
-			$tech_directions = ( new Query() )
-					->select(['l1v7_tech_direction.*', 'count' => 'count(l1v7_tech.id)'])
-					->from('l1v7_tech_direction')
-					->join('JOIN', 'l1v7_tech_tech_direction', 'l1v7_tech_tech_direction.tech_direction_id=l1v7_tech_direction.id')
-					->join('JOIN', 'l1v7_tech' , 'l1v7_tech_tech_direction.tech_id=l1v7_tech.id')
-					->groupBy('l1v7_tech_direction.id')
-					->orderBy('count DESC')
-					->all();
-
-			$inst_directions = ( new Query() )
-					->select(['l1v7_direction.*', 'count' => 'count(l1v7_institution.id)'])
-					->from('l1v7_direction')
-					->join('JOIN', 'l1v7_institution_direction', 'l1v7_institution_direction.direction_id=l1v7_direction.id')
-					->join('JOIN', 'l1v7_institution' , 'l1v7_institution_direction.institution_id=l1v7_institution.id')
-					->groupBy('l1v7_direction.id')
-					->orderBy('count DESC')
-					->all();
-
-			return $this->render('all_directions', [
-							'inst_directions' => $inst_directions,
-							'tech_directions' => $tech_directions,
-					]);
-
-		}
+		}  
+		
+		// list of directions				
+    $tech_directions = TechDirection::getAll();
+		$inst_directions = InstitutionDirection::getAll();			
+		return $this->render('all_directions', [
+						'inst_directions' => $inst_directions,
+						'tech_directions' => $tech_directions,
+				]);
 	}
 
 	public function actionRegion()

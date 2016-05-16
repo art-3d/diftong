@@ -1,0 +1,19 @@
+$(document).on('ready', function(event){
+	if( window.location.pathname == '/'){
+		$.getScript('js/jquery.typeahead.js', function(data, textStatus, jqxhr) {
+
+			$.ajax({
+				dataType: 'json',
+				url: '/ajax/get-inst',
+			  success: function(data) {
+			  
+			  },
+			  
+			});
+
+
+	}); // end loading script
+
+
+	} // end if
+});
